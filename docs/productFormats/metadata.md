@@ -112,9 +112,11 @@ This page captures all the metadata items that are present in ICEYE SLC and GRD 
 
 ## Amplitude mapping
 
-The metadata field `iceye:amplitude_mapping` describes the transform applied to the amplitude bands of the image product. It is an object with a required `function` and an optional `parameters` object. For the default power mapping, `exponent` defines the exponent \(p\), and `scale` is a positive scale factor (defaults to 1 if omitted). This field is provided in the product JSON and embedded in the GeoTIFF so that clients can read it and accurately reconstruct the true amplitude values from the stored raster band.
+The metadata field `iceye:amplitude_mapping` describes any transform applied to the amplitude bands. It is included to indicate whether and how mapping is applied; for SLC COG amplitude bands in the fine and precise imaging modes, a mapping is applied by default to preserve the full dynamic range. The object contains a required `function` and an optional `parameters` object.
 
-Amplitude mapping preserves the full dynamic range while storing amplitude in `u16`, which enables efficient compression and smaller file sizes. By default, this mapping is applied to the amplitude bands of SLC COG products for the fine and precise imaging modes.
+When the `function` is `minmax`, no non‑linear transform has been applied: values are already in the native linear scale and can be used as‑is; no inversion is required. When the `function` is `clip`, very bright amplitudes above a threshold have been saturated to preserve precision at lower amplitudes; no inversion is needed, and clipped peaks are not recoverable. When the `function` is `power`, the `parameters` may include an `exponent` \(p\) and a positive `scale` (defaults to 1 if omitted) that define the mapping and its inverse as shown below.
+
+The aim of amplitude mapping is to preserve the full dynamic range of the original amplitude while storing values in `u16`, which enables efficient compression and smaller file sizes.
 
 Let the stored amplitude value be \( y \) and the true amplitude be \( A \). The mapping is defined by a function with optional parameters; in the common “power” case with exponent \( p \) and scale factor \(\text{scale}\), the forward transform is:
 
